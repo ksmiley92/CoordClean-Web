@@ -10,8 +10,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 const markersLayer = L.layerGroup().addTo(map);
 
 const fileInput = document.getElementById("fileInput");
-const inputCrs = document.getElementById("inputCrs");
-const outputCrs = document.getElementById("outputCrs");
+const outputFormat = document.getElementById("outputFormat");
 const convertBtn = document.getElementById("convertBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const statusEl = document.getElementById("status");
@@ -60,8 +59,7 @@ convertBtn.addEventListener("click", async () => {
 
   const formData = new FormData();
   formData.append("file", file);
-  formData.append("input_crs", inputCrs.value);
-  formData.append("output_crs", outputCrs.value);
+  formData.append("output_format", outputFormat.value);
 
   try {
     const response = await fetch(BACKEND_URL, {

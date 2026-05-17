@@ -17,22 +17,16 @@
     <section class="controls">
       <header>
         <h1>CoordClean</h1>
-        <p class="tagline">Upload coordinates, convert between CRSs, preview on a map.</p>
+        <p class="tagline">Convert coordinates between decimal degrees and degrees/minutes/seconds, with a map preview.</p>
       </header>
 
       <label for="fileInput">Coordinate file (CSV or XLSX)</label>
       <input type="file" id="fileInput" accept=".csv,.xlsx" />
 
-      <label for="inputCrs">Input CRS</label>
-      <select id="inputCrs">
-        <option value="EPSG:4326">WGS84 Lat/Lon (EPSG:4326)</option>
-        <option value="EPSG:3857">Web Mercator (EPSG:3857)</option>
-      </select>
-
-      <label for="outputCrs">Output CRS</label>
-      <select id="outputCrs">
-        <option value="EPSG:4326">WGS84 Lat/Lon (EPSG:4326)</option>
-        <option value="EPSG:3857">Web Mercator (EPSG:3857)</option>
+      <label for="outputFormat">Output format</label>
+      <select id="outputFormat">
+        <option value="dms">Degrees / Minutes / Seconds</option>
+        <option value="dd">Decimal Degrees</option>
       </select>
 
       <button id="convertBtn" class="primary">Convert</button>
