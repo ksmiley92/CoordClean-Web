@@ -1,0 +1,156 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  color: #1f2933;
+  background: #f5f7fa;
+}
+
+body {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  min-height: 100vh;
+}
+
+.controls {
+  padding: 24px;
+  background: #ffffff;
+  border-right: 1px solid #e4e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.controls header {
+  margin-bottom: 8px;
+}
+
+.controls h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: #102a43;
+}
+
+.tagline {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: #627d98;
+}
+
+label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #334e68;
+  margin-top: 8px;
+}
+
+input[type="file"],
+select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 0.95rem;
+  border: 1px solid #cbd2d9;
+  border-radius: 6px;
+  background: #fff;
+}
+
+select {
+  cursor: pointer;
+}
+
+button {
+  margin-top: 8px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1px solid #cbd2d9;
+  border-radius: 6px;
+  background: #f5f7fa;
+  color: #334e68;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  background: #e4e7eb;
+}
+
+button.primary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+button.primary:hover:not(:disabled) {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+#status {
+  margin-top: 12px;
+  padding: 10px 12px;
+  min-height: 1.25rem;
+  font-size: 0.9rem;
+  background: #f0f4f8;
+  border: 1px solid #e4e7eb;
+  border-radius: 6px;
+  color: #486581;
+}
+
+#status.info {
+  background: #e0f0ff;
+  border-color: #b6dbff;
+  color: #0b4a8a;
+}
+
+#status.success {
+  background: #e3f9e5;
+  border-color: #a3e9a4;
+  color: #207227;
+}
+
+#status.error {
+  background: #ffe3e3;
+  border-color: #ffa8a8;
+  color: #a61b1b;
+}
+
+.map {
+  position: relative;
+}
+
+#map {
+  width: 100%;
+  height: 100vh;
+}
+
+@media (max-width: 800px) {
+  body {
+    grid-template-columns: 1fr;
+  }
+
+  .controls {
+    border-right: none;
+    border-bottom: 1px solid #e4e7eb;
+    overflow-y: visible;
+  }
+
+  #map {
+    height: 60vh;
+  }
+}
