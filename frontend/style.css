@@ -113,6 +113,10 @@ button:disabled {
   color: #cbd5e1;
 }
 
+#status:empty {
+  display: none;
+}
+
 #status.info {
   background: #1e3a5f;
   border-color: #2c4e7a;
