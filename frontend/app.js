@@ -15,13 +15,9 @@ const convertBtn = document.getElementById("convertBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const statusEl = document.getElementById("status");
 
-const MOCK_POINTS = [
-  { lat: 40.7128, lon: -74.006, label: "New York" },
-  { lat: 34.0522, lon: -118.2437, label: "Los Angeles" },
-  { lat: 41.8781, lon: -87.6298, label: "Chicago" },
-  { lat: 29.7604, lon: -95.3698, label: "Houston" },
-  { lat: 47.6062, lon: -122.3321, label: "Seattle" },
-];
+// Latest successful conversion, held in memory for the Download button to consume.
+let lastCsvText = null;
+let lastFilename = null;
 
 function setStatus(message, kind) {
   statusEl.textContent = message;
@@ -68,25 +64,38 @@ convertBtn.addEventListener("click", async () => {
     });
 
     if (!response.ok) {
-      throw new Error("Backend responded with status " + response.status);
+      // Surface the backend's `detail` message when present.
+      const errorBody = await response.json().catch(() => ({}));
+      throw new Error(errorBody.detail || "Status " + response.status);
     }
 
     const data = await response.json();
     renderPoints(data.points || []);
+    lastCsvText = data.csv_text;
+    lastFilename = data.filename;
     setStatus("Conversion complete.", "success");
     downloadBtn.disabled = false;
   } catch (err) {
-    renderPoints(MOCK_POINTS);
-    setStatus(
-      "Backend not available - showing mock preview. (" + err.message + ")",
-      "info"
-    );
-    downloadBtn.disabled = false;
+    markersLayer.clearLayers();
+    lastCsvText = null;
+    lastFilename = null;
+    downloadBtn.disabled = true;
+    setStatus(err.message, "error");
   } finally {
     convertBtn.disabled = false;
   }
 });
 
 downloadBtn.addEventListener("click", () => {
-  setStatus("Download will be wired to the backend response.", "info");
+  if (!lastCsvText) {
+    setStatus("Convert a file first.", "error");
+    return;
+  }
+  const blob = new Blob([lastCsvText], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = lastFilename || "coordclean.csv";
+  a.click();
+  URL.revokeObjectURL(url);
 });
