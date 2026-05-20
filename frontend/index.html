@@ -36,6 +36,23 @@
 
       <button id="convertBtn" class="primary">Convert</button>
       <button id="downloadBtn" disabled>Download Cleaned CSV</button>
+
+      <div id="paywall" class="paywall hidden">
+        <p class="paywall-message">
+          This file has more than 10 rows. Unlock the full download with a one-time
+          payment.
+        </p>
+        <a
+          id="stripePayBtn"
+          class="stripe-pay-btn"
+          href="https://buy.stripe.com/PLACEHOLDER"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Pay to download
+        </a>
+      </div>
+
       <button id="HelpBtn">Help</button>
       <div id="helpText" class="hidden">
         <p>Coordly Quick Help Guide

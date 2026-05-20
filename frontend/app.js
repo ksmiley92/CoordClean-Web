@@ -1,4 +1,7 @@
 const backendUrl = "http://localhost:8000/convert";
+const freeRowLimit = 10;
+// Replace after creating a Payment Link in the Stripe Dashboard.
+const stripePaymentUrl = "https://buy.stripe.com/PLACEHOLDER";
 
 const map = L.map("map").setView([39.5, -98.35], 4);
 
@@ -16,6 +19,8 @@ const downloadBtn = document.getElementById("downloadBtn");
 const statusEl = document.getElementById("status");
 const helpBtn = document.getElementById("HelpBtn");
 const helpText = document.getElementById("helpText");
+const paywall = document.getElementById("paywall");
+const stripePayBtn = document.getElementById("stripePayBtn");
 
 // Latest successful conversion, held in memory for the Download button to consume.
 let lastCsvText = null;
@@ -24,6 +29,17 @@ let lastFilename = null;
 function setStatus(message, kind) {
   statusEl.textContent = message;
   statusEl.className = kind || "";
+}
+
+function updatePaywall(rowCount) {
+  if (rowCount > freeRowLimit) {
+    paywall.classList.remove("hidden");
+    stripePayBtn.href = stripePaymentUrl;
+    downloadBtn.disabled = true;
+  } else {
+    paywall.classList.add("hidden");
+    downloadBtn.disabled = false;
+  }
 }
 
 function renderPoints(points) {
@@ -83,11 +99,12 @@ convertBtn.addEventListener("click", async () => {
     } else {
       setStatus("Conversion complete.", "success");
     }
-    downloadBtn.disabled = false;
+    updatePaywall(data.row_count);
   } catch (err) {
     markersLayer.clearLayers();
     lastCsvText = null;
     lastFilename = null;
+    paywall.classList.add("hidden");
     downloadBtn.disabled = true;
     setStatus(err.message, "error");
   } finally {
@@ -98,6 +115,10 @@ convertBtn.addEventListener("click", async () => {
 downloadBtn.addEventListener("click", () => {
   if (!lastCsvText) {
     setStatus("Convert a file first.", "error");
+    return;
+  }
+  if (!paywall.classList.contains("hidden")) {
+    setStatus("Payment required for files over 10 rows.", "error");
     return;
   }
   const blob = new Blob([lastCsvText], { type: "text/csv" });
