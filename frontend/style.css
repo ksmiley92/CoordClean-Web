@@ -159,3 +159,7 @@ button:disabled {
     height: 60vh;
   }
 }
+
+.hidden {
+  display: none;
+}

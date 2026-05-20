@@ -1,0 +1,7 @@
+## Start uvicorn server
+
+1. cd C:\CoordClean-Web\backend
+
+2. .venv\Scripts\activate.bat
+
+3. uvicorn main:app --reload --port 8000
