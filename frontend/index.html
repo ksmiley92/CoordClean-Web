@@ -36,7 +36,17 @@
 
       <button id="convertBtn" class="primary">Convert</button>
       <button id="downloadBtn" disabled>Download Cleaned CSV</button>
-      <button id="Help" disabled>Help</button>
+      <button id="HelpBtn">Help</button>
+      <div id="helpText" class="hidden">
+        <p>Coordly Quick Help Guide
+          <ol>
+            <li>Upload your CSV or XLSX file. The app will detect columns called "Latitude" and "Longitude", "Lat" and "Long", or "Y" and "X".</li>
+            <li>Select the output format</li>
+            <li>Click the Convert button</li>
+            <li>Download the cleaned CSV file</li>
+          </ol>
+        </p>
+      </div>
 
       <div id="status" role="status"></div>
     </section>

@@ -14,6 +14,8 @@ const outputFormat = document.getElementById("outputFormat");
 const convertBtn = document.getElementById("convertBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const statusEl = document.getElementById("status");
+const helpBtn = document.getElementById("HelpBtn");
+const helpText = document.getElementById("helpText");
 
 // Latest successful conversion, held in memory for the Download button to consume.
 let lastCsvText = null;
@@ -98,4 +100,8 @@ downloadBtn.addEventListener("click", () => {
   a.download = lastFilename || "coordclean.csv";
   a.click();
   URL.revokeObjectURL(url);
+});
+
+helpBtn.addEventListener("click", () => {
+  helpText.classList.toggle("hidden");
 });
