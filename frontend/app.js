@@ -1,7 +1,7 @@
 const backendUrl = "http://localhost:8000/convert";
 const freeRowLimit = 10;
 // Replace after creating a Payment Link in the Stripe Dashboard.
-const stripePaymentUrl = "https://buy.stripe.com/PLACEHOLDER";
+const stripePaymentUrl = "https://buy.stripe.com/eVq6oI9129QW9t37xa3wQ01";
 
 const map = L.map("map").setView([39.5, -98.35], 4);
 
