@@ -1,4 +1,4 @@
-const BACKEND_URL = "http://localhost:8000/convert";
+const backendUrl = "http://localhost:8000/convert";
 
 const map = L.map("map").setView([39.5, -98.35], 4);
 
@@ -60,7 +60,7 @@ convertBtn.addEventListener("click", async () => {
   formData.append("output_format", outputFormat.value);
 
   try {
-    const response = await fetch(BACKEND_URL, {
+    const response = await fetch(backendUrl, {
       method: "POST",
       body: formData,
     });
@@ -75,7 +75,14 @@ convertBtn.addEventListener("click", async () => {
     renderPoints(data.points || []);
     lastCsvText = data.csv_text;
     lastFilename = data.filename;
-    setStatus("Conversion complete.", "success");
+    if (data.dropped_count > 0) {
+      setStatus(
+        `Converted ${data.row_count} row(s). ${data.dropped_count} row(s) couldn't be parsed and were dropped.`,
+        "info"
+      );
+    } else {
+      setStatus("Conversion complete.", "success");
+    }
     downloadBtn.disabled = false;
   } catch (err) {
     markersLayer.clearLayers();
