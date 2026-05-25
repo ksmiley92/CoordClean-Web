@@ -36,6 +36,17 @@
 
       <button id="convertBtn" class="primary">Convert</button>
       <button id="downloadBtn" disabled>Download Cleaned CSV</button>
+
+      <div id="paywall" class="paywall hidden">
+        <p class="paywall-message">
+          This file has more than 10 rows. Unlock the full download with a one-time
+          payment.
+        </p>
+        <button type="button" id="stripePayBtn" class="stripe-pay-btn">
+          Pay to download
+        </button>
+      </div>
+
       <button id="HelpBtn">Help</button>
       <div id="helpText" class="hidden">
         <p>Coordly Quick Help Guide
@@ -44,6 +55,7 @@
             <li>Select the output format</li>
             <li>Click the Convert button</li>
             <li>Download the cleaned CSV file</li>
+          <p>Note: DMS output will be in the format of "40°26'46.4\"N 79°58'56.3\"W"</p>
           </ol>
         </p>
       </div>

@@ -160,6 +160,38 @@ button:disabled {
   }
 }
 
+.paywall {
+  margin-top: 12px;
+  padding: 12px;
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 6px;
+}
+
+.paywall-message {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.stripe-pay-btn {
+  display: inline-block;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  color: #ffffff;
+  background: #635bff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.stripe-pay-btn:hover {
+  background: #4f46e5;
+}
+
 .hidden {
   display: none;
 }
