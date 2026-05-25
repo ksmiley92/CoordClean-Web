@@ -183,7 +183,9 @@ button:disabled {
   text-decoration: none;
   color: #ffffff;
   background: #635bff;
+  border: none;
   border-radius: 6px;
+  cursor: pointer;
 }
 
 .stripe-pay-btn:hover {

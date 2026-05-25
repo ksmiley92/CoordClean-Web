@@ -1,11 +1,82 @@
 from io import BytesIO
+import os
 import re
+import time
+from uuid import uuid4
 
 import pandas as pd
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+import stripe
+from dotenv import load_dotenv
+from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
+load_dotenv()
+
 max_file_size = 5 * 1024 * 1024
+free_row_limit = int(os.getenv("FREE_ROW_LIMIT", "10"))
+job_ttl_seconds = 3600
+frontend_base_url = os.getenv(
+    "FRONTEND_BASE_URL", "http://127.0.0.1:5500/frontend").rstrip("/")
+stripe_price_id = os.getenv("STRIPE_PRICE_ID")
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
+
+# Paid conversions: csv_text is held here until GET /download verifies Stripe payment.
+jobs = {}
+
+
+def cleanup_expired_jobs() -> None:
+    """Remove paid-tier jobs older than job_ttl_seconds from the in-memory store."""
+    now = time.time()
+    expired = [
+        job_id
+        for job_id, job in jobs.items()
+        if now - job["created_at"] > job_ttl_seconds
+    ]
+    for job_id in expired:
+        del jobs[job_id]
+
+
+def store_job(csv_text: str, filename: str) -> str:
+    """Save a paid conversion's CSV and return a new job_id for checkout and download."""
+    cleanup_expired_jobs()
+    job_id = str(uuid4())
+    jobs[job_id] = {
+        "csv_text": csv_text,
+        "filename": filename,
+        "created_at": time.time(),
+    }
+    return job_id
+
+
+def get_job(job_id: str):
+    """Return the stored job dict, or None if the job_id is unknown or expired."""
+    cleanup_expired_jobs()
+    return jobs.get(job_id)
+
+
+def create_checkout_url(job_id: str) -> str:
+    """Start a Stripe Checkout Session for this job and return the hosted payment URL."""
+    if not stripe.api_key or not stripe_price_id:
+        raise HTTPException(
+            status_code=503,
+            detail="Payment is not configured. Set STRIPE_SECRET_KEY and STRIPE_PRICE_ID in backend/.env.",
+        )
+    try:
+        session = stripe.checkout.Session.create(
+            mode="payment",
+            line_items=[{"price": stripe_price_id, "quantity": 1}],
+            metadata={"job_id": job_id},
+            success_url=f"{frontend_base_url}/?session_id={{CHECKOUT_SESSION_ID}}&job_id={job_id}",
+            cancel_url=f"{frontend_base_url}/?cancelled=1",
+        )
+    except stripe.StripeError as exc:
+        raise HTTPException(
+            status_code=502, detail=f"Could not start checkout: {exc.user_message or str(exc)}")
+    if not session.url:
+        raise HTTPException(
+            status_code=502, detail="Stripe did not return a checkout URL.")
+    return session.url
+
 
 # Accepted header aliases (case-insensitive). Order = priority if multiple match.
 lat_names = ["lat", "latitude", "y"]
@@ -82,7 +153,7 @@ def parse_coordinate(value, is_lat: bool) -> float:
     return magnitude
 
 
-app = FastAPI(title="CoordClean", version="1.1")
+app = FastAPI(title="CoordClean", version="1.3")
 
 # Allow the frontend to call us whether it's opened as file://, served via
 # `python -m http.server`, or running on any other localhost port.
@@ -99,9 +170,11 @@ async def convert(
     file: UploadFile = File(...),
     output_format: str = Form(...),
 ):
+    """Parse a CSV/XLSX upload, return map points, and either csv_text (free) or a Stripe checkout URL (paid)."""
     output_format = output_format.lower()
     if output_format not in {"dd", "dms"}:
-        raise HTTPException(status_code=400, detail="output_format must be 'dd' or 'dms'.")
+        raise HTTPException(
+            status_code=400, detail="output_format must be 'dd' or 'dms'.")
 
     # Read the whole upload into memory once; small enough given max_file_size.
     contents = await file.read()
@@ -117,18 +190,21 @@ async def convert(
         elif lower_name.endswith(".xlsx"):
             df = pd.read_excel(BytesIO(contents), engine="openpyxl")
         else:
-            raise HTTPException(status_code=400, detail="Unsupported file type. Use .csv or .xlsx.")
+            raise HTTPException(
+                status_code=400, detail="Unsupported file type. Use .csv or .xlsx.")
     except HTTPException:
         raise
     except Exception as exc:
-        raise HTTPException(status_code=400, detail=f"Could not parse file: {exc}")
+        raise HTTPException(
+            status_code=400, detail=f"Could not parse file: {exc}")
 
     # Map lowercased headers -> original column names so we can match aliases
     # case-insensitively while still indexing the DataFrame by its real column.
     column_map = {str(c).strip().lower(): c for c in df.columns}
     lat_col = next((column_map[k] for k in lat_names if k in column_map), None)
     lon_col = next((column_map[k] for k in lon_names if k in column_map), None)
-    label_col = next((column_map[k] for k in label_names if k in column_map), None)
+    label_col = next((column_map[k]
+                     for k in label_names if k in column_map), None)
 
     if lat_col is None or lon_col is None:
         raise HTTPException(
@@ -138,7 +214,8 @@ async def convert(
 
     # Parse each cell as DD or DMS; unparseable cells become NaN and are dropped below.
     df[lat_col] = df[lat_col].apply(lambda v: parse_coordinate(v, is_lat=True))
-    df[lon_col] = df[lon_col].apply(lambda v: parse_coordinate(v, is_lat=False))
+    df[lon_col] = df[lon_col].apply(
+        lambda v: parse_coordinate(v, is_lat=False))
 
     valid = df[lat_col].between(-90, 90) & df[lon_col].between(-180, 180)
     original_count = len(df)
@@ -153,7 +230,8 @@ async def convert(
 
     # Signed decimal -> "DD°MM'SS.SS"H", e.g. 46.5854172 -> 46°35'07.50"N.
     def to_dms(value: float, is_lat: bool) -> str:
-        hemisphere = ("N" if value >= 0 else "S") if is_lat else ("E" if value >= 0 else "W")
+        hemisphere = ("N" if value >= 0 else "S") if is_lat else (
+            "E" if value >= 0 else "W")
         absolute = abs(value)
         degrees = int(absolute)
         minutes_full = (absolute - degrees) * 60
@@ -179,13 +257,61 @@ async def convert(
     # Windows-1252, which would otherwise render "°" as "Â°".
     csv_text = "\ufeff" + out_df.to_csv(index=False)
 
-    stem = re.sub(r"\.(csv|xlsx)$", "", filename, flags=re.IGNORECASE) or "coordclean"
+    stem = re.sub(r"\.(csv|xlsx)$", "", filename,
+                  flags=re.IGNORECASE) or "coordclean"
     download_name = f"{stem}_{output_format}.csv"
+    row_count = len(out_df)
+
+    if row_count > free_row_limit:
+        job_id = store_job(csv_text, download_name)
+        checkout_url = create_checkout_url(job_id)
+        return {
+            "points": points,
+            "row_count": row_count,
+            "dropped_count": dropped_count,
+            "needs_payment": True,
+            "job_id": job_id,
+            "checkout_url": checkout_url,
+        }
 
     return {
         "points": points,
         "csv_text": csv_text,
         "filename": download_name,
-        "row_count": len(out_df),
+        "row_count": row_count,
         "dropped_count": dropped_count,
     }
+
+
+@app.get("/download")
+async def download(
+    job_id: str = Query(...),
+    session_id: str = Query(...),
+):
+    """Verify Stripe payment for a job_id, then return the withheld csv_text and filename."""
+    if not stripe.api_key:
+        raise HTTPException(
+            status_code=503,
+            detail="Payment is not configured. Set STRIPE_SECRET_KEY in backend/.env.",
+        )
+
+    job = get_job(job_id)
+    if job is None:
+        raise HTTPException(
+            status_code=404, detail="Conversion job not found or expired.")
+
+    try:
+        session = stripe.checkout.Session.retrieve(session_id)
+    except stripe.StripeError as exc:
+        raise HTTPException(
+            status_code=400, detail=f"Invalid payment session: {exc.user_message or str(exc)}")
+
+    if session.payment_status != "paid":
+        raise HTTPException(status_code=402, detail="Payment not completed.")
+
+    metadata_job_id = session.metadata["job_id"] if session.metadata else None
+    if metadata_job_id != job_id:
+        raise HTTPException(
+            status_code=403, detail="Payment session does not match this conversion.")
+
+    return {"csv_text": job["csv_text"], "filename": job["filename"]}

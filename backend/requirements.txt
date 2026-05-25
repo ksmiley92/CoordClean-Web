@@ -4,4 +4,6 @@ uvicorn[standard]==0.47.0
 python-multipart==0.0.29
 pandas==3.0.3
 # XLSX engine used by pandas.read_excel.
+stripe==15.1.0
+python-dotenv==1.2.2
 openpyxl==3.1.5
