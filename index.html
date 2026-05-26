@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coordly</title>
+
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+      crossorigin=""
+    />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <section class="controls">
+      <header>
+        <h1>Coordly</h1>
+        <p class="tagline">GIS Coordinates simplified, by SmileyGeo</p>
+        <br />
+        <p class="tagline">
+          Convert coordinates between decimal degrees and
+          degrees/minutes/seconds, with a map preview.
+        </p>
+      </header>
+
+      <label for="fileInput">Coordinate file (CSV or XLSX)</label>
+      <input type="file" id="fileInput" accept=".csv,.xlsx" />
+
+      <label for="outputFormat">Output format</label>
+      <select id="outputFormat">
+        <option value="dms">Degrees / Minutes / Seconds</option>
+        <option value="dd">Decimal Degrees</option>
+      </select>
+
+      <button id="convertBtn" class="primary">Convert</button>
+      <button id="downloadBtn" disabled>Download Cleaned CSV</button>
+
+      <div id="paywall" class="paywall hidden">
+        <p class="paywall-message">
+          This file has more than 10 rows. Unlock the full download with a one-time
+          payment.
+        </p>
+        <button type="button" id="stripePayBtn" class="stripe-pay-btn">
+          Pay to download
+        </button>
+      </div>
+
+      <button id="HelpBtn">Help</button>
+      <div id="helpText" class="hidden">
+        <p>Coordly Quick Help Guide
+          <ol>
+            <li>Upload your CSV or XLSX file. The app will detect columns called "Latitude" and "Longitude", "Lat" and "Long", or "Y" and "X".</li>
+            <li>Select the output format</li>
+            <li>Click the Convert button</li>
+            <li>Download the cleaned CSV file</li>
+          <p>Note: DMS output will be in the format of "40°26'46.4\"N 79°58'56.3\"W"</p>
+          </ol>
+        </p>
+      </div>
+
+      <div id="status" role="status"></div>
+    </section>
+
+    <section class="map">
+      <div id="map"></div>
+    </section>
+
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <script src="app.js" defer></script>
+  </body>
+</html>

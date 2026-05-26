@@ -1,0 +1,197 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  color: #e5e7eb;
+  background: #1f2937;
+}
+
+body {
+  display: grid;
+  grid-template-columns: 360px 1fr;
+  min-height: 100vh;
+}
+
+.controls {
+  padding: 24px;
+  background: #2c3a4f;
+  border-right: 1px solid #475569;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+}
+
+.controls header {
+  margin-bottom: 8px;
+}
+
+.controls h1 {
+  margin: 0;
+  font-size: 1.6rem;
+  color: #f1f5f9;
+}
+
+.tagline {
+  margin: 4px 0 0;
+  font-size: 0.9rem;
+  color: #94a3b8;
+}
+
+label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-top: 8px;
+}
+
+input[type="file"],
+select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 0.95rem;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  background: #334155;
+  color: #f1f5f9;
+}
+
+select {
+  cursor: pointer;
+}
+
+button {
+  margin-top: 8px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  border: 1px solid #475569;
+  border-radius: 6px;
+  background: #334155;
+  color: #cbd5e1;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+button:hover:not(:disabled) {
+  background: #475569;
+}
+
+button.primary {
+  background: #3e6491;
+  border-color: #3e6491;
+  color: #ffffff;
+}
+
+button.primary:hover:not(:disabled) {
+  background: #2e4d72;
+  border-color: #2e4d72;
+}
+
+button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+#status {
+  margin-top: 12px;
+  padding: 10px 12px;
+  min-height: 1.25rem;
+  font-size: 0.9rem;
+  background: #172033;
+  border: 1px solid #2c3a4f;
+  border-radius: 6px;
+  color: #cbd5e1;
+}
+
+#status:empty {
+  display: none;
+}
+
+#status.info {
+  background: #1e3a5f;
+  border-color: #2c4e7a;
+  color: #bfdbfe;
+}
+
+#status.success {
+  background: #14532d;
+  border-color: #166534;
+  color: #bbf7d0;
+}
+
+#status.error {
+  background: #3a2329;
+  border-color: #6e3c44;
+  color: #c4a5a9;
+}
+
+.map {
+  position: relative;
+}
+
+#map {
+  width: 100%;
+  height: 100vh;
+}
+
+@media (max-width: 800px) {
+  body {
+    grid-template-columns: 1fr;
+  }
+
+  .controls {
+    border-right: none;
+    border-bottom: 1px solid #334155;
+    overflow-y: visible;
+  }
+
+  #map {
+    height: 60vh;
+  }
+}
+
+.paywall {
+  margin-top: 12px;
+  padding: 12px;
+  background: #1e293b;
+  border: 1px solid #475569;
+  border-radius: 6px;
+}
+
+.paywall-message {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: #cbd5e1;
+}
+
+.stripe-pay-btn {
+  display: inline-block;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  color: #ffffff;
+  background: #635bff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.stripe-pay-btn:hover {
+  background: #4f46e5;
+}
+
+.hidden {
+  display: none;
+}
