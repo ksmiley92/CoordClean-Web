@@ -1,5 +1,5 @@
-const backendUrl = "http://127.0.0.1:8000/convert";
-const backendDownloadUrl = "http://127.0.0.1:8000/download";
+const backendUrl = "https://coordly-api.onrender.com/convert";
+const backendDownloadUrl = "https://coordly-api.onrender.com/download";
 const freeRowLimit = 10;
 
 const map = L.map("map").setView([39.5, -98.35], 4);
