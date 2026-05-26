@@ -33,7 +33,7 @@ The frontend is hardcoded to talk to the backend at `http://127.0.0.1:8000`. If 
 
 ## Stripe setup
 
-Create a file at `backend/.env` (it's gitignored, don't commit it):
+Create a file at `backend/.env` (copy from `backend/.env.example`; it's gitignored):
 
 ```
 STRIPE_SECRET_KEY=sk_test_...
@@ -48,6 +48,7 @@ What those are:
 - `STRIPE_PRICE_ID` — one-time product Price ID from Stripe Dashboard → Products (`price_...`)
 - `FRONTEND_BASE_URL` — where Stripe sends the user after checkout
 - `FREE_ROW_LIMIT` — row count before the paywall kicks in (defaults to 10 if omitted)
+- `CORS_ORIGIN` — only needed in production; set to your live frontend URL on Render (see Deploy section)
 
 To test the paywall:
 
@@ -66,13 +67,20 @@ The app looks for lat/lon columns by header name — things like Lat/Lon, Latitu
 - `POST /convert` — parse an upload; free tier returns `csv_text`, paid tier returns `needs_payment` and a `checkout_url`
 - `GET /download?job_id=&session_id=` — verify Stripe payment and return the withheld CSV
 
-## Before you deploy
+## Deploy
 
-- Point `FRONTEND_BASE_URL` in `.env` at your real frontend URL so Stripe redirects correctly
-- Update the backend URLs in `frontend/app.js` to match wherever the API lives
-- Add your production domain to the CORS config in `backend/main.py`
-- Use HTTPS and live Stripe keys when you go live
-- Consider a `checkout.session.completed` webhook — v1.3 relies on the success redirect to unlock downloads
+Backend goes on [Render](https://render.com), frontend on Hostinger. Full step-by-step is in [.cursor/plans/Hosting.md](.cursor/plans/Hosting.md).
+
+Short version:
+
+- **Phase 1** — Deploy `backend/` as a Render Web Service. Set env vars from `backend/.env.example`. Test with `/docs`.
+- **Phase 2** — Buy domain, upload `frontend/` files to Hostinger, set `CORS_ORIGIN` and `FRONTEND_BASE_URL` on Render, update `app.js` with your Render API URL.
+
+Production env vars on Render:
+
+- `STRIPE_SECRET_KEY`, `STRIPE_PRICE_ID`, `FRONTEND_BASE_URL`, `CORS_ORIGIN`, `FREE_ROW_LIMIT`
+
+Render free tier spins down when idle (slow first request) and restarts wipe in-memory paid jobs — users re-convert if that happens.
 
 ## Caveats
 

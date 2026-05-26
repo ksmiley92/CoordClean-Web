@@ -17,6 +17,7 @@ free_row_limit = int(os.getenv("FREE_ROW_LIMIT", "10"))
 job_ttl_seconds = 3600
 frontend_base_url = os.getenv(
     "FRONTEND_BASE_URL", "http://127.0.0.1:5500/frontend").rstrip("/")
+cors_origin = os.getenv("CORS_ORIGIN", "").strip()
 stripe_price_id = os.getenv("STRIPE_PRICE_ID")
 stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
@@ -155,14 +156,16 @@ def parse_coordinate(value, is_lat: bool) -> float:
 
 app = FastAPI(title="CoordClean", version="1.3")
 
-# Allow the frontend to call us whether it's opened as file://, served via
-# `python -m http.server`, or running on any other localhost port.
-app.add_middleware(
-    CORSMiddleware,
-    allow_origin_regex=r"http://(localhost|127\.0\.0\.1)(:\d+)?",
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+# Local dev: localhost regex. Production: set CORS_ORIGIN to your frontend URL (e.g. https://coordly.app).
+cors_middleware_kwargs = {
+    "allow_origin_regex": r"http://(localhost|127\.0\.0\.1)(:\d+)?",
+    "allow_methods": ["*"],
+    "allow_headers": ["*"],
+}
+if cors_origin:
+    cors_middleware_kwargs["allow_origins"] = [cors_origin]
+
+app.add_middleware(CORSMiddleware, **cors_middleware_kwargs)
 
 
 @app.post("/convert")
