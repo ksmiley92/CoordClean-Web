@@ -197,6 +197,16 @@ async def convert(
                 status_code=400, detail="Unsupported file type. Use .csv or .xlsx.")
     except HTTPException:
         raise
+    except UnicodeDecodeError:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Could not read this CSV file. It may be saved in Excel's default "
+                "format instead of UTF-8, which often happens when coordinates contain "
+                "degree symbols (°). Save as 'CSV UTF-8 (Comma delimited)' in Excel, "
+                "or upload an .xlsx file instead."
+            ),
+        )
     except Exception as exc:
         raise HTTPException(
             status_code=400, detail=f"Could not parse file: {exc}")
