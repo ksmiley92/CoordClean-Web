@@ -197,6 +197,16 @@ async def convert(
                 status_code=400, detail="Unsupported file type. Use .csv or .xlsx.")
     except HTTPException:
         raise
+    except UnicodeDecodeError:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                "Could not read this CSV file. It may be saved in Excel's default "
+                "format instead of UTF-8, which often happens when coordinates contain "
+                "degree symbols (°). Save as 'CSV UTF-8 (Comma delimited)' in Excel, "
+                "or upload an .xlsx file instead."
+            ),
+        )
     except Exception as exc:
         raise HTTPException(
             status_code=400, detail=f"Could not parse file: {exc}")
@@ -212,7 +222,7 @@ async def convert(
     if lat_col is None or lon_col is None:
         raise HTTPException(
             status_code=400,
-            detail="Could not detect latitude/longitude columns. Expected headers like Lat/Lon, Latitude/Longitude, or Y/X.",
+            detail="Could not detect latitude/longitude columns. Try renaming to headers like Lat/Lon, Latitude/Longitude, or Y/X.",
         )
 
     # Parse each cell as DD or DMS; unparseable cells become NaN and are dropped below.
@@ -228,7 +238,7 @@ async def convert(
     if df.empty:
         raise HTTPException(
             status_code=400,
-            detail="No valid coordinate rows found (lat must be -90..90, lon must be -180..180).",
+            detail="No valid coordinate rows found (lat must be -90..90, lon must be -180..180). Try switching the columns for latitude and longitude and double check values",
         )
 
     # Signed decimal -> "DD°MM'SS.SS"H", e.g. 46.5854172 -> 46°35'07.50"N.
