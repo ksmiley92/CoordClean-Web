@@ -228,7 +228,7 @@ async def convert(
     if df.empty:
         raise HTTPException(
             status_code=400,
-            detail="No valid coordinate rows found (lat must be -90..90, lon must be -180..180).",
+            detail="No valid coordinate rows found (lat must be -90..90, lon must be -180..180). Try switching the columns for latitude and longitude.",
         )
 
     # Signed decimal -> "DD°MM'SS.SS"H", e.g. 46.5854172 -> 46°35'07.50"N.
