@@ -222,7 +222,7 @@ async def convert(
     if lat_col is None or lon_col is None:
         raise HTTPException(
             status_code=400,
-            detail="Could not detect latitude/longitude columns. Expected headers like Lat/Lon, Latitude/Longitude, or Y/X.",
+            detail="Could not detect latitude/longitude columns. Try renaming to headers like Lat/Lon, Latitude/Longitude, or Y/X.",
         )
 
     # Parse each cell as DD or DMS; unparseable cells become NaN and are dropped below.
