@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, File, Form, HTTPException, Query, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 
+# load environment variables from .env file. These are stored separate so that the .env file is not committed to the repository.
 load_dotenv()
 
 max_file_size = 5 * 1024 * 1024
