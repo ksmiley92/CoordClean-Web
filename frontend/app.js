@@ -1,7 +1,9 @@
+// backend URLs Config
 const backendUrl = "https://coordly-api.onrender.com/convert";
 const backendDownloadUrl = "https://coordly-api.onrender.com/download";
 const freeRowLimit = 10;
 
+// initialize the map
 const map = L.map("map").setView([39.5, -98.35], 4);
 
 L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -11,6 +13,7 @@ L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
 
 const markersLayer = L.layerGroup().addTo(map);
 
+// DOM page elements
 const fileInput = document.getElementById("fileInput");
 const outputFormat = document.getElementById("outputFormat");
 const convertBtn = document.getElementById("convertBtn");
@@ -21,17 +24,21 @@ const helpText = document.getElementById("helpText");
 const paywall = document.getElementById("paywall");
 const stripePayBtn = document.getElementById("stripePayBtn");
 
+//state variables
 let lastCsvText = null;
 let lastFilename = null;
 let lastJobId = null;
 let lastCheckoutUrl = null;
 let paymentComplete = false;
 
+// set the status based on whether the conversion is successful or not
 function setStatus(message, kind) {
   statusEl.textContent = message;
   statusEl.className = kind || "";
 }
 
+// update the paywall based on whether payment is needed and whether the 
+// payment is complete
 function updatePaywall(needsPayment) {
   if (needsPayment && !paymentComplete) {
     paywall.classList.remove("hidden");
@@ -42,6 +49,7 @@ function updatePaywall(needsPayment) {
   }
 }
 
+// render the points on the map
 function renderPoints(points) {
   markersLayer.clearLayers();
 
@@ -61,6 +69,7 @@ function renderPoints(points) {
   map.fitBounds(latLngs, { padding: [30, 30] });
 }
 
+// handle the payment return from the Stripe checkout
 async function handlePaymentReturn() {
   const params = new URLSearchParams(window.location.search);
   const sessionId = params.get("session_id");
@@ -106,6 +115,8 @@ async function handlePaymentReturn() {
   }
 }
 
+// convert the uploaded file. Quit if none chosen. Set status to converting. 
+// Disable convert button. Reset payment complete. Reset job ID. Reset checkout URL.
 convertBtn.addEventListener("click", async () => {
   const file = fileInput.files[0];
   if (!file) {
@@ -177,6 +188,7 @@ convertBtn.addEventListener("click", async () => {
   }
 });
 
+// pay to download the cleaned CSV file
 stripePayBtn.addEventListener("click", () => {
   if (lastCheckoutUrl) {
     window.location.href = lastCheckoutUrl;
@@ -185,6 +197,7 @@ stripePayBtn.addEventListener("click", () => {
   }
 });
 
+// download the cleaned CSV file
 downloadBtn.addEventListener("click", () => {
   if (!lastCsvText) {
     setStatus("Convert a file first.", "error");
